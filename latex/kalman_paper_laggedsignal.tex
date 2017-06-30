@@ -1,0 +1,355 @@
+\documentclass[a4,12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\parindent 0pt
+
+
+\begin{document}
+
+%% !TEX root = ../Version1.tex
+% \clearpage
+
+\section{Informational Content of Consensus Prices}
+\label{Section:Theory} 
+In this section we set up a simple model of consensus pricing based on subscribers who share a common prior about an asset of uncertain value, and receive noisy private and public signals about this asset value at discrete points in time. Based on the prior and the signals received, each subscriber submits her best current estimate for the asset value to the consensus pricing service.
+
+\subsection{A Simple Model of Consensus Pricing} 
+
+$N$ financial insitutions participate in a consensus pricing service. At discrete submission dates, indexed $t=1,2,3...$, each institution submits its best estimate for the current value of an unobservable stochastic process $\{ \theta_t \}$ to the service. The unobservable stochastic process evolves according to
+\[ \theta_t = (1-\rho) \bar{\theta} + \rho \, \theta_{t-1} + \varepsilon_t \] 
+with $-1 < \rho < 1$ and where the innovations $\varepsilon_t$ are independent across time and normally distributed
+
+\[ \varepsilon_t \sim N \left(0,\sigma_\varepsilon^2 \right). \]
+
+Initially, all submitters start with a common prior for $\theta_0$, $N(\mu_0,\sigma^2_0)$. At each subsequent submission date $t$ they receive a noisy public signal $S_t$ about $\theta_{t-1}$,
+\[ S_t = a + b \, \theta_{t-1} + u_t = \left[a - \frac{b (1-\rho) \bar{\theta}}{\rho} \right] + \left( \frac{b}{\rho} \right) \theta_{t} - \left( \frac{b}{\rho} \right) \varepsilon_t + u_t,  \]
+where $u_t \sim N(0,\sigma_u^2)$.\\
+\\
+In addition to the public signal $S_t$ each institution receives a noisy private signal $s_{i,t}$ about $\theta_t$,
+
+\[ s_{i,t} = \theta_t + \nu_{i,t},\] 
+where $\nu_{i,t} \sim N(0,\sigma_\nu^2)$.\\
+\\
+Conditional on $\theta_t$ all period $t$ signals are independent.\\
+\\
+We denote institution i's period $t$ information set by $I_{i,t}$. We assume that this information set consists of the history of public and private signals that $i$ has observed up to period $t$, that is \footnote{In principle the information set in our setting should also include past consensus prices, i.e. the cross-sectional averages of the individual institutions' submissions to the consensus pricing service. This, however, would be a setup in which submitters learn from endogenous variables with the well-known consequence of potentially infinite state spaces due to having to keep track of higher order beliefs for signal extraction purposes (see Townsend (1983), Sargent (1991)). While some progress has recently been made to address such problems, either by using trunction methods for the state space (Nimark (2015)) or working in the frequency domain (Kasa (2000), Kasa et al. (2014), Rondina and Walker (2016)), we sidestep these issues by using an exogenous public signal and leave the modelling of endogenous feedback from consensus prices for future work.}
+\[ I_{i,t} = \{ s_{i,j}, S_j\}_{j=1}^t. \]
+
+To characterise institution i's submission to the consensus service in period $t$ we need to calculate its best estimate of $\theta_t$ which is given by $\mu_{i,t} \equiv \mathbb{E}\left(\theta_t | I_{i,t} \right)$. Under our above assumption of normal priors in combination with normally distributed signals and state we know that i's beliefs will be normally distributed as well, 
+\[ \theta_t | I_{i,t} \sim N(\mu_{i,t}, \sigma_{i,t}^2).\]
+
+\subsection{Submitters' Belief Dynamics}
+
+We can now derive $\mu_{i,t}$ and $\sigma_{i,t}^2$ using standard Kalman filtering techniques. The derivation of submitters' beliefs follows the notation in Durbin, J., \& Koopman, S. J. (2012). The state of the system is denoted by $\alpha_t$. We take the state to be $\alpha_t = (\theta_t, \varepsilon_t)'$. Conditional on information available at $t-1$ prior beliefs are given by
+\[ \alpha_t | I_{t-1} \sim N(a_t, P_t).\]
+Define $\sigma^2_t = Var(\theta_t | I_{t-1})$. Note that as $\varepsilon_t$ is an i.i.d shock we have
+\begin{equation*}
+P_t =
+\left(
+\begin{array}{cc}
+\sigma^2_{t} & \sigma_\varepsilon^2\\
+\sigma_\varepsilon^2 & \sigma_\varepsilon^2
+\end{array}
+\right).
+\end{equation*}
+The transition equation for the system is then given by
+\begin{equation}
+\alpha_{t} = c + T \, \alpha_{t-1} + R \, \eta_t
+\end{equation}
+or 
+\begin{equation*}
+\left(
+\begin{array}{c}
+\theta_t\\
+\varepsilon_t
+\end{array}
+\right)
+=
+\left(
+\begin{array}{c}
+(1-\rho) \bar{\theta}\\
+0
+\end{array}
+\right)
++
+\left(
+\begin{array}{cc}
+\rho & 0\\
+0 & 0
+\end{array}
+\right)
+\left(
+\begin{array}{c}
+\theta_{t-1}\\
+\varepsilon_{t-1}
+\end{array}
+\right)
++
+\left(
+\begin{array}{cc}
+1 & 0\\
+1 & 0
+\end{array}
+\right)
+\left(
+\begin{array}{c}
+\varepsilon_t\\
+0
+\end{array}
+\right)
+\end{equation*}
+with
+\begin{equation*}
+\eta_t \sim N(0, Q) \; \; , \; \;
+Q =
+\left(
+\begin{array}{cc}
+\sigma_{\varepsilon}^2 & 0\\
+0 & 0
+\end{array}
+\right).
+\end{equation*}
+
+The measurement equation is given by
+\begin{equation}
+y_t = d + Z \alpha_t + \psi_t
+\end{equation}
+or
+\begin{equation*}
+\left(
+\begin{array}{c}
+S_t\\
+s_{i,t}
+\end{array}
+\right)
+=
+\left(
+\begin{array}{c}
+a - b(1-\rho) \bar{\theta}/\rho\\
+0
+\end{array}
+\right)
++
+\left(
+\begin{array}{cc}
+b/\rho & -b/\rho\\
+1 & 0
+\end{array}
+\right)
+\left(
+\begin{array}{c}
+\theta_{t}\\
+\varepsilon_{t}
+\end{array}
+\right)
++
+\left(
+\begin{array}{c}
+u_t\\
+\nu_{i,t}
+\end{array}
+\right)
+\end{equation*}
+with
+\begin{equation*}
+\psi_t \sim N(0, H) \; \; , \; \;
+H =
+\left(
+\begin{array}{cc}
+\sigma_{u}^2 & 0\\
+0 & \sigma_\nu^2
+\end{array}
+\right).
+\end{equation*}
+
+Applying the Kalman filter, beliefs conditional on information available at $t$ are given by
+\[ \alpha_t | I_t \sim N(a_{t|t}, P_{t|t}) \]
+where
+\begin{equation*}
+a_{t|t} = a_t + K_t (y_t - d - Z a_t)
+\end{equation*}
+and
+\begin{equation*}
+P_{t|t} = P_t - K_t Z P_t
+\end{equation*}
+with
+\begin{equation*}
+K_t = P_t Z' F_t^{-1} \; \; \mbox{and} \; \; F_t = Z P_t Z' + H.
+\end{equation*}
+For the above system the Kalman gain $K_t = (\bold{k}_t^{\theta}, \bold{k}_t^{\varepsilon})'$ is
+\begin{equation}\label{kalman_theta}
+\bold{k}_t^{\theta} = \bold{k}^\theta(\sigma_{t}^2) = \frac{1}{m_t} \left[ \rho \, b \, \sigma_v^2 (\sigma_\varepsilon^2 - \sigma_t^2), \, b^2 \, \sigma_\varepsilon^2 (\sigma_\varepsilon^2 - \sigma_t^2) - \rho^2 \, \sigma_u^2 \, \sigma_t^2 \right],
+\end{equation}
+\begin{equation}
+\bold{k}_t^{\varepsilon} = \bold{k}^\varepsilon(\sigma_{t}^2) = \frac{1}{m_t} \left[ - \rho \, b \, \sigma_\varepsilon^2 (\sigma_\varepsilon^2 - \sigma_t^2), \,  b^2 \sigma_\varepsilon^2 (\sigma_\varepsilon^2 - \sigma_t^2) -  \rho^2 \, \sigma_\varepsilon^2 \, \sigma_u^2 \right]
+\end{equation}
+with
+\begin{equation}
+m_t = m(\sigma_t^2) = b^2 (\sigma_\varepsilon^2 + \sigma_\nu^2)(\sigma_\varepsilon^2 - \sigma_t^2) - \rho^2 \, \sigma_u^2 (\sigma_v^2 + \sigma_t^2).
+\end{equation}
+Beliefs for next period's state, $\alpha_{t+1}$, conditional on information available in period $t$ are then computed according to
+\begin{equation}
+a_{t+1} = c + T a_{t|t}
+\end{equation}
+and
+\begin{equation}
+P_{t+1} = T P_{t|t} T' + R Q R' .
+\end{equation}
+
+Note that from the logic of the state transition equation we have $a_t = (\mu_t, 0)'$ where $\mu_t = E(\theta_t | I_{t-1})$. It follows that the dynamics of beliefs are characterised by
+\begin{equation*}
+\mu_{t|t} = \mu_t + k_{1t}^{\theta} \left( S_t - a - b \, \mu_{t-1|t-1} \right) + k_{2t}^{\theta} \left( s_{it} - \mu_t \right).
+\end{equation*}
+This can be written as
+\begin{equation}
+\mu_{t|t} = (1-\rho) \bar{\theta} + (1-k_t) \rho \, \mu_{t-1|t-1} + k_t \, \rho \, \theta_{t-1} + k_{1t}^\theta \, u_t + k_{2t}^\theta \, \nu_{it} + k_{2t}^\theta \, \varepsilon_t
+\end{equation}
+where
+\begin{equation*}
+k_t = k_{2t}^\theta + \left( \frac{b}{\rho} \right) k_{1t}^\theta .
+\end{equation*}
+
+\subsection*{Steady State}
+
+As our system is time-invariant, the covariance matrix $P_{t+1}$ converges to a constant matrix $\bar{P}$ which is the solution to
+\begin{align*}
+&\bar{P} = T (\bar{P} - \bar{K} Z \bar{P}) T' + R Q R'\\
+& \bar{K} = \bar{P} Z' (Z \bar{P} Z' + H)^{-1}.
+\end{align*}
+
+Given the structure of $P_t$ this boils down to a single quadratic equation in $\bar{\sigma}$, the first diagonal element of $\bar{P}$. The only solution to this equation that is strictly positive for all allowable parameter combinations is given by
+\begin{multline*}
+\bar{\sigma} = \frac{1}{2(b^2 \, \sigma_\varepsilon^2 + b^2 \, \sigma_\nu^2 + \rho^2 \, \sigma_u^2)} \times \\
+\left( \rho^2 \, \sigma_u^2 \left[ \sigma_\varepsilon^2 - (1-\rho^2) \sigma_\nu^2 \right] + b^2 \, \sigma_\varepsilon^2 (2 \sigma_\varepsilon^2 + \sigma_\nu^2 (2 + \rho^2)) \right. \times \\
+\left. \rho^2 \sqrt{\sigma_\varepsilon^2 (\sigma_u^2 + b^2 \sigma_\nu^2)^2 + \sigma_u^2 \, \sigma_\nu^2 (1-\rho^2)^2 + 2 \, \sigma_\varepsilon^2 \, \sigma_u^2 \, \sigma_\nu^2 (\sigma_u^2 + b^2 \sigma_\nu^2)(1+\rho^2)} \right)
+\end{multline*}
+The corresponding stationary Kalman gain is given by $\bar{K} = \left(\bold{k}^\theta(\bar{\sigma}), \, \bold{k}^\varepsilon(\bar{\sigma})\right)'$.
+
+\section{Estimation}
+
+We estimate the parameters of the above model, $\{\rho, \bar{\theta}, \sigma^2_\varepsilon, \sigma^2_u, \sigma^2_\nu, a, b \}$, by maximum likelihood separately for each options contract. For a given contract, that is fixed time-to-maturity, moneyness, and option type (put or call), our data consist of the time-series of submissions by the institutions participating in the Totem consensus pricing service for this specific contract. We assume that if an institution submits a price at $t$, this price corresponds to its best estimate of $\theta_t$, that is $\mu_{i,t}$ as derived above. If an institution does not submit a price in $t$, we treat this as a missing value. However, it is assumed that this institution received both the public and a private signal about $\theta_t$ in that period. As we will use the Kalman filter to derive the likelihood function, the treatment of such missing values is straightforward.\footnote{For the treatment of missing values in the Kalman filter see, for example, Durbin and Koopman (2012), Chapter 4.10.} Let $N$ be the total number of institutions that have submitted to Totem over the course of our sample and let $\iota_t \subset \{1,2,..,N\}$ be the set of institutions active in $t$. Our sample of submissions is then given by $(\bold{x}_t)_{t=1}^T$ where $\bold{x}_t = (x_{j,t})_{j \in \iota_t}$ is a $|\iota_t|$-dimensional vector consisting of the individual period $t$ consensus price submissions.\\
+We furthermore assume that the public signal $S_t$ is observable and given by the value of the consensus prices for the given contract on the previous submission date $\bar{\mu}_{t-1}$.
+\\
+\\
+To estimate the model, we assume that the system has reached its stationary limit and thus each institutions $i$'s conditional expectations $\mu_{i,t} = \mathbb{E}(\theta_t | I_{i,t})$ evolve acording to
+\begin{equation}
+\mu_{i,t} = (1-\rho) \bar{\theta} + (1-k) \rho \, \mu_{i,t-1} + k \, \rho \, \theta_{t-1} + k_{1}^\theta \, u_t + k_{2}^\theta \, \nu_{it} + k_{2}^\theta \, \varepsilon_t
+\end{equation}
+where $[k_1^\theta(\bar{\sigma}), k_2^\theta(\bar{\sigma})] = \bar{k}^\theta(\bar{\sigma})$ is given in \eqref{kalman_theta} and $k = k_2^\theta + (b/\rho) k_1^\theta$.\\
+\\
+$\theta_t$ follows the AR(1) process specified previously. Again, as stated above, the shocks $\varepsilon_t, u_t$, and $\{\nu_{i,t}\}_{i=1}^N$ are normally distributed and uncorrelated. Given the linearity and normality of the system, the likelihood function for the observed data $(\bold{y})_{t=1}^T$ where $\bold{y}_t = (\bold{x}_t,S_t)$ can be derived using the Kalman filter. We define $\alpha_t = (\theta_t, \mu_t, \varepsilon_t, u_t)'$ to be the state of the system in $t$ with $\mu_t = (\mu_{1,t},...,\mu_{N,t})$.\\
+\\
+The \textit{transition equation} of the system in state space form is then given by
+
+\begin{equation}
+\alpha_t = c + T \alpha_{t-1} + R \, \epsilon_t
+\end{equation}
+where \footnote{$\bold{0}_N$ is a (column) vector containing $N$ zeros, $\bold{1}_N$ is a (column) vector containing $N$ ones, and $I_N$ is an $N$-dimensional identity matrix.}
+\begin{equation*}
+c = \left( \bold{1}_{N+1}^{'} \, (1-\rho) \, \bar{\theta} \, , \, 0 ,\, 0 \right)^{'}
+\end{equation*}
+\begin{equation*}
+T = \left(
+\begin{array}{cccc}
+\rho & \bold{0}_N^' & 0 & 0\\
+k \, \rho \, \bold{1}_N & (1-k) \rho \, I_N & 0 & 0\\
+0 & \bold{0}_N^' & 0 & 0\\
+0 & \bold{0}_N^' & 0 & 0
+\end{array}
+\right) 
+\; , \;
+R = \left(
+\begin{array}{ccc}
+1 & 0 & \bold{0}_N^'\\
+k_2^\theta \, \bold{1}_N & k_1^\theta \, \bold{1}_N & k_2^\theta I_N \\
+1 & 0 & \bold{0}_N^'\\
+0 & 1 & \bold{0}_N^'
+\end{array}
+\right)
+\end{equation*}
+and $\epsilon_t = (\varepsilon_t \, , u_t \, , \nu_{1,t} \, ,...,\nu_{N,t})'$ with covariance matrix
+\begin{equation*}
+\Sigma = \mathbb{E}(\epsilon_t \, \epsilon_t') = 
+\left(
+\begin{array}{ccc}
+\sigma_\varepsilon^2 & 0 & \bold{0}_N^'\\
+0 & \sigma_u^2 & \bold{0}_N^'\\
+\bold{0}_N & \bold{0}_N & \sigma_\nu^2 \, I_N
+\end{array}
+\right). 
+\end{equation*}
+The \textit{observation equation} for the system is given by
+\begin{equation}
+\bold{y}_t = d_t + Z_t \, \alpha_t + \psi_t
+\end{equation}
+where
+\begin{equation*}
+d_t = \left(\bold{0}_{|\iota_t|} \, , \, a - b(1-\rho) \bar{\theta} /\rho\right)^{'}
+\end{equation*}
+and
+\begin{equation*}
+Z_t = 
+\left(
+\begin{array}{cccc}
+\bold{0}_{|\iota_t|} & J_t & 0 & 0 \\
+(b/\rho) & \bold{0}_{|\iota_t|}^{'} & -(b/\rho) & 1
+\end{array}
+\right).
+\end{equation*}
+$J_t$ is a $(|\iota_t| \times N)$ matrix . Let $\iota_{k,t}$ designate the $k$-th element of the index $\iota_t$. Then row $k$ of $J_t$ has a 1 in position $\iota_{k,t}$ and zeros otherwise. The time-varying matrix $Z_t$ is a convenient way to deal with missing values. $\psi_t$ is an $(N+1)$-dimensional vector of serially uncorrelated and normally distributed mean-zero measurement errors with covariance matrix $\sigma^2_\psi I_{N+1}$.
+\\
+\\
+Given a prior for the state of the system at $t=1$, $\alpha_1 \sim N(\bold{a}_1, P_1)$, we can now apply the usual Kalman filter recursion to derive the likelihood function for the available data $(\bold{y}_t)_{t=1}^T$ given the parameter vector $\Psi$, $L \left( (\bold{y}_t)_{t=1}^T \mid \Psi \right)$. We obtain maximum likelihood estimates for $\Psi$ by maximising the corresponding log-likelihood function numerically.
+
+\newpage
+
+\section*{Simulations}
+
+
+% Table created by stargazer v.5.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: Fri, Jun 30, 2017 - 10:34:24
+\begin{table}[!htbp] \centering 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}} cccccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & $\rho$ & $\bar{\theta}$ & $\sigma^2_u$ & $\sigma^2_\nu$ & $\sigma^2_\varepsilon$ & $a$ & $b$ \\ 
+\hline \\[-1.8ex] 
+sim & $0.8000$ & $0.2000$ & $0.0006$ & $0.0004$ & $0.0030$ & $0.1000$ & $0.9000$ \\ 
+mean & $0.8768$ & $0.3492$ & $0.0006$ & $0.0004$ & $0.0031$ & $0.0985$ & $0.9088$ \\ 
+sd & $0.1045$ & $0.6581$ & $0.0001$ & $0.00002$ & $0.0004$ & $0.0072$ & $0.0353$ \\ 
+median & $0.9089$ & $0.2109$ & $0.0006$ & $0.0004$ & $0.0031$ & $0.0982$ & $0.9066$ \\ 
+\hline \\[-1.8ex] 
+\end{tabular} 
+\caption{\small{Simulations (K) = 100, submitters (N) = 20, time periods (T) = 150.}} 
+\end{table} 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=12cm]{estimation/kalman/figures/sim_laggedsignal_300617}
+\end{figure}
+
+
+% Table created by stargazer v.5.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: Fri, Jun 30, 2017 - 16:26:26
+\begin{table}[!htbp] \centering  
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}} cccccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & $\rho$ & $\bar{\theta}$ & $\sigma^2_u$ & $\sigma^2_\nu$ & $\sigma^2_\varepsilon$ & $a$ & $b$ \\ 
+\hline \\[-1.8ex] 
+sim & $0.800000$ & $0.200000$ & $0.000625$ & $0.000400$ & $0.003000$ & $0.100000$ & $0.900000$ \\ 
+2 & $0.059925$ & $0.004202$ & $0.000084$ & $0.000014$ & $0.000316$ & $0.000550$ & $0.022880$ \\ 
+4 & $0.055777$ & $0.004571$ & $0.000067$ & $0.000016$ & $0.000241$ & $0.000556$ & $0.020147$ \\ 
+5 & $0.050929$ & $0.003108$ & $0.000085$ & $0.000017$ & $0.000241$ & $0.000581$ & $0.024061$ \\ 
+10 & $0.045735$ & $0.003562$ & $0.000098$ & $0.000017$ & $0.000240$ & $0.000504$ & $0.022208$ \\ 
+\hline \\[-1.8ex] 
+\end{tabular} 
+\caption{\small{Standard errors BHHH method for first 10 simulations (missing observation means negative diagonal element in information matrix)}}
+\end{table} 
+
+\end{document}
